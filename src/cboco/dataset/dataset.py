@@ -39,7 +39,7 @@ class Dataset:
         images = [Image(**im) for im in data['images']]
         images_by_id = {image.id: image for image in images}
         categories = [Category(**cat) for cat in data['categories']]
-        annotations = [Annotation(**ann, images_by_id=images_by_id) for ann in data['annotations']]
+        annotations = [Annotation(**ann, image=images_by_id[ann['image_id']]) for ann in data['annotations']]
         
         return cls(
             images=images,
