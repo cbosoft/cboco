@@ -1,0 +1,499 @@
+{
+  "info": {
+    "year": "2023",
+    "version": null,
+    "description": "Created with MDPC App <> Annnotation Tool",
+    "date_created": "2023-07-14 18:21:09",
+    "contributor": null,
+    "url": null
+  },
+  "images": [
+    {
+      "id": 0,
+      "file_name": "COCO_2017_Subset/000000000285.jpg",
+      "height": 640,
+      "width": 586,
+      "date_created": null,
+      "license": null,
+      "flickr_url": null,
+      "filckr_url": null,
+      "coco_url": null,
+      "date_captured": null
+    },
+    {
+      "id": 1,
+      "file_name": "COCO_2017_Subset/000000000785.jpg",
+      "height": 425,
+      "width": 640,
+      "date_created": null,
+      "license": null,
+      "flickr_url": null,
+      "filckr_url": null,
+      "coco_url": null,
+      "date_captured": null
+    },
+    {
+      "id": 2,
+      "file_name": "COCO_2017_Subset/000000001296.jpg",
+      "height": 640,
+      "width": 427,
+      "date_created": null,
+      "license": null,
+      "flickr_url": null,
+      "filckr_url": null,
+      "coco_url": null,
+      "date_captured": null
+    },
+    {
+      "id": 3,
+      "file_name": "COCO_2017_Subset/000000002149.jpg",
+      "height": 427,
+      "width": 640,
+      "date_created": null,
+      "license": null,
+      "flickr_url": null,
+      "filckr_url": null,
+      "coco_url": null,
+      "date_captured": null
+    },
+    {
+      "id": 4,
+      "file_name": "COCO_2017_Subset/000000003661.jpg",
+      "height": 384,
+      "width": 640,
+      "date_created": null,
+      "license": null,
+      "flickr_url": null,
+      "filckr_url": null,
+      "coco_url": null,
+      "date_captured": null
+    }
+  ],
+  "annotations": [
+    {
+      "id": 0,
+      "image_id": 0,
+      "category_id": 1,
+      "bbox": [
+        3,
+        117,
+        579,
+        517
+      ],
+      "segmentation": [
+        [
+          5,
+          425,
+          36,
+          401,
+          57,
+          331,
+          89,
+          204,
+          183,
+          124,
+          312,
+          117,
+          449,
+          188,
+          508,
+          288,
+          578,
+          339,
+          582,
+          634,
+          3,
+          632
+        ]
+      ],
+      "area": 299343.0,
+      "iscrowd": 0,
+      "score": 1.0
+    },
+    {
+      "id": 1,
+      "image_id": 1,
+      "category_id": 2,
+      "bbox": [
+        281,
+        46,
+        219,
+        335
+      ],
+      "segmentation": [
+        [
+          285,
+          172,
+          281,
+          190,
+          296,
+          200,
+          368,
+          165,
+          386,
+          214,
+          352,
+          263,
+          384,
+          340,
+          347,
+          364,
+          427,
+          365,
+          421,
+          330,
+          392,
+          281,
+          413,
+          261,
+          454,
+          370,
+          500,
+          381,
+          470,
+          311,
+          445,
+          284,
+          455,
+          214,
+          445,
+          187,
+          465,
+          179,
+          455,
+          149,
+          425,
+          105,
+          395,
+          90,
+          383,
+          49,
+          361,
+          46,
+          351,
+          75,
+          337,
+          149
+        ]
+      ],
+      "area": 73365.0,
+      "iscrowd": 0,
+      "score": 1.0
+    },
+    {
+      "id": 2,
+      "image_id": 2,
+      "category_id": 2,
+      "bbox": [
+        13,
+        12,
+        413,
+        621
+      ],
+      "segmentation": [
+        [
+          78,
+          632,
+          13,
+          412,
+          95,
+          345,
+          117,
+          64,
+          231,
+          12,
+          296,
+          136,
+          364,
+          148,
+          378,
+          291,
+          411,
+          291,
+          426,
+          633
+        ]
+      ],
+      "area": 256473.0,
+      "iscrowd": 0,
+      "score": 1.0
+    },
+    {
+      "id": 3,
+      "image_id": 3,
+      "category_id": 3,
+      "bbox": [
+        6,
+        254,
+        235,
+        143
+      ],
+      "segmentation": [
+        [
+          48,
+          259,
+          11,
+          289,
+          6,
+          372,
+          235,
+          397,
+          241,
+          347,
+          131,
+          254
+        ]
+      ],
+      "area": 33605.0,
+      "iscrowd": 0,
+      "score": 1.0
+    },
+    {
+      "id": 4,
+      "image_id": 3,
+      "category_id": 3,
+      "bbox": [
+        105,
+        114,
+        222,
+        202
+      ],
+      "segmentation": [
+        [
+          105,
+          222,
+          136,
+          139,
+          253,
+          114,
+          327,
+          172,
+          320,
+          269,
+          299,
+          297,
+          240,
+          316,
+          184,
+          277,
+          132,
+          249
+        ]
+      ],
+      "area": 44844.0,
+      "iscrowd": 0,
+      "score": 1.0
+    },
+    {
+      "id": 5,
+      "image_id": 3,
+      "category_id": 3,
+      "bbox": [
+        347,
+        87,
+        216,
+        211
+      ],
+      "segmentation": [
+        [
+          357,
+          162,
+          347,
+          200,
+          403,
+          296,
+          470,
+          298,
+          562,
+          240,
+          563,
+          138,
+          525,
+          87,
+          405,
+          100
+        ]
+      ],
+      "area": 45576.0,
+      "iscrowd": 0,
+      "score": 1.0
+    },
+    {
+      "id": 6,
+      "image_id": 3,
+      "category_id": 3,
+      "bbox": [
+        473,
+        308,
+        157,
+        80
+      ],
+      "segmentation": [
+        [
+          473,
+          372,
+          534,
+          308,
+          611,
+          321,
+          630,
+          360,
+          510,
+          388
+        ]
+      ],
+      "area": 12560.0,
+      "iscrowd": 0,
+      "score": 1.0
+    },
+    {
+      "id": 7,
+      "image_id": 4,
+      "category_id": 4,
+      "bbox": [
+        142,
+        200,
+        327,
+        134
+      ],
+      "segmentation": [
+        [
+          142,
+          229,
+          170,
+          308,
+          360,
+          334,
+          469,
+          270,
+          467,
+          227,
+          430,
+          200,
+          215,
+          207
+        ]
+      ],
+      "area": 43818.0,
+      "iscrowd": 0,
+      "score": 1.0
+    },
+    {
+      "id": 8,
+      "image_id": 4,
+      "category_id": 4,
+      "bbox": [
+        76,
+        5,
+        335,
+        185
+      ],
+      "segmentation": [
+        [
+          76,
+          14,
+          191,
+          144,
+          360,
+          190,
+          411,
+          186,
+          387,
+          144,
+          360,
+          52,
+          240,
+          5
+        ]
+      ],
+      "area": 61975.0,
+      "iscrowd": 0,
+      "score": 1.0
+    },
+    {
+      "id": 9,
+      "image_id": 4,
+      "category_id": 4,
+      "bbox": [
+        363,
+        5,
+        182,
+        192
+      ],
+      "segmentation": [
+        [
+          363,
+          8,
+          376,
+          106,
+          423,
+          189,
+          472,
+          197,
+          528,
+          156,
+          545,
+          106,
+          542,
+          5
+        ]
+      ],
+      "area": 34944.0,
+      "iscrowd": 0,
+      "score": 1.0
+    }
+  ],
+  "licenses": [],
+  "categories": [
+    {
+      "id": 1,
+      "name": "Elongated",
+      "supercategory": null
+    },
+    {
+      "id": 2,
+      "name": "Regular",
+      "supercategory": null
+    },
+    {
+      "id": 3,
+      "name": "Spherical",
+      "supercategory": null
+    },
+    {
+      "id": 4,
+      "name": "Agglomerated",
+      "supercategory": null
+    },
+    {
+      "id": 5,
+      "name": "Platelet",
+      "supercategory": null
+    },
+    {
+      "id": 6,
+      "name": "User 1",
+      "supercategory": null
+    },
+    {
+      "id": 7,
+      "name": "User 2",
+      "supercategory": null
+    },
+    {
+      "id": 8,
+      "name": "User 3",
+      "supercategory": null
+    },
+    {
+      "id": 9,
+      "name": "User 4",
+      "supercategory": null
+    },
+    {
+      "id": 10,
+      "name": "Impurity",
+      "supercategory": null
+    }
+  ]
+}
