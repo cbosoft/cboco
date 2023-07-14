@@ -1,0 +1,4 @@
+dist
+.DS_Store
+*.un~
+__pycache__
