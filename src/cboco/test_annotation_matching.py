@@ -1,5 +1,6 @@
 from cboco.dataset import Annotation
-from cboco.evaluation.evaluate_dataset import match_pred_to_truth, precalculate_combinatorial_ious
+from cboco.evaluation.match import match_pred_to_truth
+from cboco.evaluation.precalculate import precalculate_combinatorial_ious
 
 
 def test_annot_box_iou_1():
