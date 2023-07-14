@@ -71,10 +71,10 @@ def match_all_preds_to_truth(
     # match up ground truth to predictions
     for true in true_annotations:
         matched = match_pred_to_truth(true, predicted_annotations, ious, iou_thresh, class_agnostic)
-        if matched:
+        if matched is not None:
             tp += 1
-            matched[0].is_tp = True
-            matched[0].relevant_iou = ious[true.id, matched[0].id]
+            matched.is_tp = True
+            matched.relevant_iou = ious[true.id, matched.id]
     return tp
 
 
