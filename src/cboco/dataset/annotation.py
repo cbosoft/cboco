@@ -57,6 +57,31 @@ class Annotation:
         self.is_tp = False
         self.relevant_iou = 0.0
     
+    @classmethod
+    def from_contour(
+        cls,
+        contour: np.ndarray,
+        category_id: int,
+        score: float = None,
+        **extra,
+    ) -> "Annotation":
+        seg = [[int(i) for i in contour.reshape(-1)]]
+        x1 = int(np.min(contour[..., 0]))
+        x2 = int(np.max(contour[..., 0]))
+        y1 = int(np.min(contour[..., 1]))
+        y2 = int(np.max(contour[..., 1]))
+        bbox = (x1, y1, x2, y2)
+        return cls(
+            id=-1,
+            image_id=-1,
+            segmentation=seg,
+            image=None,
+            bbox=bbox,
+            category_id=category_id,
+            score=score,
+            **extra,
+        )
+    
     def seg_iou(self, other: "Annotation"):
         i = np.sum(self.mask & other.mask)
         u = np.sum(self.mask | other.mask)
