@@ -90,11 +90,13 @@ def calculate_AP(predicted_matched_annotations: List[Annotation], sort_by_iou: b
         ps.append(tp / (tp + fp))
         rs.append(tp / gtp)
     
+    # interpolate precision to be monotonically decreasing
     pinterp = []
     for i in range(len(rs)):
         pinterp.append(max(ps[-i-1:]))
     pinterp = pinterp[::-1]
 
+    # return area under (interpolated) precision-recall curve
     return float(np.trapz(pinterp, rs))
 
 
