@@ -1,7 +1,7 @@
 import os
 
 from cboco.dataset import Dataset
-from cboco.evaluation.evaluate_dataset import evaluate_dataset
+from cboco.evaluation import evaluate_dataset
 
 
 def test_eval():
