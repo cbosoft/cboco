@@ -128,6 +128,8 @@ def evaluate_dataset(
     pann, tann = preds.annotations, truth.annotations
 
     ious = precalculate_combinatorial_ious(truth.annotations, preds.annotations, iou_method, show_progress)
+
+    should_calc_AP = sort_by_iou or pann[0].score
     
     # ensure IoU thresh is iterable
     try:
@@ -148,7 +150,9 @@ def evaluate_dataset(
         metrics[f'P_{tname}'] = p
         metrics[f'R_{tname}'] = r
         metrics[f'F1_{tname}'] = f1
-        metrics[f'AP_{tname}'] = calculate_AP(pann, sort_by_iou, gtp)
+
+        if should_calc_AP:
+            metrics[f'AP_{tname}'] = calculate_AP(pann, sort_by_iou, gtp)
     
     if len(iou_thresh) > 1:
         metrics['mAP'] = np.mean([v for k, v in metrics.items() if 'AP' in k])
