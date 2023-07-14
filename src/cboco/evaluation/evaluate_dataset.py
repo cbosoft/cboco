@@ -125,7 +125,7 @@ def evaluate_dataset(
     preds, truth = get_datasets_intersection(preds, truth)
     pann, tann = preds.annotations, truth.annotations
 
-    ious = precalculate_combinatorial_ious(truth, preds, iou_method, show_progress)
+    ious = precalculate_combinatorial_ious(truth.annotations, preds.annotations, iou_method, show_progress)
     
     # ensure IoU thresh is iterable
     try:
