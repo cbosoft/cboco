@@ -23,6 +23,8 @@ class Image:
     @classmethod
     def from_file(cls, file_name: str, **extra) -> "Image":
         img = cv2.imread(file_name, cv2.IMREAD_GRAYSCALE)
+        if img is None:
+            raise IOError(f'Could not read image "{file_name}".')
         h, w = img.shape
         return cls(
             id=-1,
