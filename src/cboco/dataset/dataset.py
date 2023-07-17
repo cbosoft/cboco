@@ -153,4 +153,34 @@ class Dataset:
             im.set_id(i)
             ds.annotations.extend(im.annotations)
         return ds
+    
+    def union(self, *others: "Dataset", collision_strategy='error') -> "Dataset":
+        def update_imset(im: Image, imset: dict) -> Image:
+            fn = im.file_name
+            if fn in imset:
+                if collision_strategy == 'error':
+                    raise ValueError(f'Image {fn} present in two or more datasets')
+                elif collision_strategy == 'merge':
+                    imset[fn].annotations.extend(im.annotations)
+                elif collision_strategy == 'preserve':
+                    pass
+                else:
+                    raise ValueError(f'Unknown collision strategy "{collision_strategy}" in union')
+            else:
+                imset[fn] = im
+
+        image_set = {
+            image.file_name: image
+            for image in self.images
+        }
+        for other in others:
+            for image in other.images:
+                update_imset(image, image_set)
+            
+        self.annotations = []
+        for i, im in enumerate(self.images, start=1):
+            im.set_id(i)
+            self.annotations.extend(im.annotations)
+        return self
+        
         

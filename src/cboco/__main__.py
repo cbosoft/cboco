@@ -49,6 +49,13 @@ class SplitMethod(enum.Enum):
     random = 'random'
 
 
+class CollisionStrategy(enum.Enum):
+    """Dataset union collision handling strategy."""
+    merge = 'merge'
+    error = 'error'
+    preserve = 'preserve'
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument('command', type=Command, action=EnumAction, help=Command.__doc__)
@@ -57,7 +64,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--split-method', type=SplitMethod, required=False, action=EnumAction, help=SplitMethod.__doc__)
     parser.add_argument('--seed', type=int, default=0, help='Random seed.')
     parser.add_argument('--subset-size', type=int, default=0)
-    parser.add_argument('--subset-by-total', action='store_true', default=False, help='Specify to count subset by overall image, default is to striate subset by dir.')
+    parser.add_argument('--subset-by-total', action='store_true', default=False, help='Specify subset size by overall image, default is to striate subset by dir.')
+    parser.add_argument('--union-collision-strategy', type=CollisionStrategy, action=EnumAction, help=CollisionStrategy.__doc__, default=CollisionStrategy.error)
     return parser.parse_args()
 
 
@@ -69,7 +77,7 @@ def main():
     elif args.command == Command.intersect:
         todo()
     elif args.command == Command.union:
-        todo()
+        do_union(args)
     elif args.command == Command.subset:
         do_subset(args)
     elif args.command == Command.unit:
@@ -106,6 +114,15 @@ def do_subset(args):
     Dataset\
         .from_json(args.file[0])\
         .subset(method=args.split_method.value, by_dir=not args.subset_by_total, count=args.subset_size)\
+        .to_json(args.output)
+
+
+def do_union(args):
+    assert len(args.file) > 1, 'unit requires at least 2 input datasets'
+    assert args.output, 'union requires `--output`'
+    datasets = [Dataset.from_json(fn) for fn in args.file]
+    datasets[0]\
+        .union(*datasets[1:], collision_strategy=args.union_collision_strategy.value)\
         .to_json(args.output)
 
 
