@@ -138,6 +138,7 @@ class Annotation:
             image_id=self.image_id,
             category_id=self.category_id,
             segmentation=self.segmentation,
+            bbox=self.bbox,
             iscrowd=self.iscrowd,
             **self.extra
         )
