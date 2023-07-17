@@ -36,17 +36,44 @@ class EnumAction(argparse.Action):
 
 
 class Command(enum.Enum):
+    """Command to run. `stats` collects and displays statistics about the specified dataset. `intersect` takes two or more datasets, and outputs the common items between those datasets. `union` takes two or more datasets, and returns the combination of all of them. `subset` takes a dataset and returns a portion of the dataset, split by `split-method`. `unit` is the unit operation: reads a dataset and writes it out again - useful for catching or fixing bugs or formatting issues."""
     stats = 'stats'
     intersect = 'intersect'
     union = 'union'
     subset = 'subset'
+    unit = 'unit'
+
+
+class SplitMethod(enum.Enum):
+    """Dataset split method."""
+    random = 'random'
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument('command', type=Command, action=EnumAction)
-    parser.add_argument('file', type=str, nargs='+')
+    parser.add_argument('command', type=Command, action=EnumAction, help=Command.__doc__)
+    parser.add_argument('file', type=str, nargs='+', help='Dataset json file paths')
+    parser.add_argument('--output', '-o', type=str, required=False, help='Output file name. Only required for commands that would write out.')
+    parser.add_argument('--split-method', type=SplitMethod, required=False, action=EnumAction, help=SplitMethod.__doc__)
+    parser.add_argument('--seed', type=int, default=0, help='Random seed.')
     return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+
+    if args.command == Command.stats:
+        do_stats(args)
+    elif args.command == Command.intersect:
+        todo()
+    elif args.command == Command.union:
+        todo()
+    elif args.command == Command.subset:
+        todo()
+    elif args.command == Command.unit:
+        do_unit(args)
+    else:
+        raise ValueError(f'Unhandled command {args.command}!')
 
 
 def do_stats(args):
@@ -61,23 +88,14 @@ def do_stats(args):
             print(f' - {cls}: {n}')
 
 
+def do_unit(args):
+    assert len(args.file) == 1, 'unit accepts only 1 input dataset'
+    assert args.output, 'unit requires `--output`'
+    Dataset.from_json(args.file[0]).to_json(args.output)
+
+
 def todo(_):
     raise NotImplementedError
-
-
-def main():
-    args = parse_args()
-
-    if args.command == Command.stats:
-        do_stats(args)
-    elif args.command == Command.intersect:
-        todo()
-    elif args.command == Command.union:
-        todo()
-    elif args.command == Command.subset:
-        todo()
-    else:
-        raise ValueError(f'Unhandled command {args.command}!')
 
 
 if __name__ == '__main__':
