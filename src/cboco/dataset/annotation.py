@@ -18,11 +18,12 @@ class Annotation:
             image_id: int,
             segmentation: List[List[int]],
             category_id: int,
-            image: Image,
-            bbox: List[int],
+            image: Image = None,
+            bbox: List[int] = None,
             score: float = None,
             iscrowd=0,
             **extra):
+        assert image or bbox
         self.id = id
         self.image_id = image_id
         self.category_id = category_id
@@ -33,6 +34,7 @@ class Annotation:
         if iscrowd:
             raise NotImplementedError
         self.extra = extra
+
 
         if image is not None:
             seg = np.array(segmentation)
