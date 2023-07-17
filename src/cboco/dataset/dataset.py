@@ -1,5 +1,8 @@
-from typing import List, Dict
+import os
 import json
+from typing import List, Dict
+from dataclasses import dataclass
+from collections import defaultdict
 
 import numpy as np
 import cv2
@@ -10,6 +13,16 @@ from .image import Image
 
 
 class Dataset:
+
+    @dataclass
+    class Statistics:
+        num_images: int
+        num_annotations: int
+        num_annotations_by_dir: Dict[str, int]
+        num_annotated_images: int
+        num_annotated_images_by_dir: Dict[str, int]
+        num_annotations_by_class: Dict[str, int]
+        
 
     def __init__(
             self,
@@ -59,3 +72,36 @@ class Dataset:
     def to_json(self, fn):
         with open(fn, 'w') as f:
             json.dump(self.to_dict(), f, indent=2)
+    
+    def collect_statistics(self) -> Statistics:
+        num_images = len(self.images)
+        num_annotations = len(self.annotations)
+        num_annotated_images = 0
+        num_annotated_images_by_dir = {}
+        num_annotations_by_dir = defaultdict(int)
+        num_annotations_by_class = defaultdict(int)
+        categories = {
+            cat.id: cat.name
+            for cat in self.categories
+        }
+        for image in self.images:
+            d = os.path.dirname(image.file_name)
+            n = len(image.annotations)
+            num_annotations_by_dir[d] += n
+            if d not in num_annotated_images_by_dir:
+                num_annotated_images_by_dir[d] = 0
+            if n:
+                num_annotated_images += 1
+                num_annotated_images_by_dir[d] += 1
+            
+            for ann in image.annotations:
+                num_annotations_by_class[categories[ann.category_id]] += 1
+        
+        return self.Statistics(
+            num_images,
+            num_annotations,
+            num_annotations_by_dir,
+            num_annotated_images,
+            num_annotated_images_by_dir,
+            num_annotations_by_class,
+        )
