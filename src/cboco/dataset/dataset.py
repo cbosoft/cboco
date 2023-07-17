@@ -58,4 +58,4 @@ class Dataset:
     
     def to_json(self, fn):
         with open(fn, 'w') as f:
-            json.dump(self.to_dict(), f)
+            json.dump(self.to_dict(), f, indent=2)
