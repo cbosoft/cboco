@@ -56,6 +56,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--output', '-o', type=str, required=False, help='Output file name. Only required for commands that would write out.')
     parser.add_argument('--split-method', type=SplitMethod, required=False, action=EnumAction, help=SplitMethod.__doc__)
     parser.add_argument('--seed', type=int, default=0, help='Random seed.')
+    parser.add_argument('--subset-size', type=int, default=0)
+    parser.add_argument('--subset-by-total', action='store_true', default=False, help='Specify to count subset by overall image, default is to striate subset by dir.')
     return parser.parse_args()
 
 
@@ -69,7 +71,7 @@ def main():
     elif args.command == Command.union:
         todo()
     elif args.command == Command.subset:
-        todo()
+        do_subset(args)
     elif args.command == Command.unit:
         do_unit(args)
     else:
@@ -91,7 +93,20 @@ def do_stats(args):
 def do_unit(args):
     assert len(args.file) == 1, 'unit accepts only 1 input dataset'
     assert args.output, 'unit requires `--output`'
-    Dataset.from_json(args.file[0]).to_json(args.output)
+    Dataset\
+        .from_json(args.file[0])\
+        .to_json(args.output)
+
+
+def do_subset(args):
+    assert len(args.file) == 1, 'subset accepts only 1 input dataset'
+    assert args.output, 'subset requires `--output`'
+    assert args.subset_size, 'subset requires `--subset-size`'
+    assert args.split_method, 'subset requires `--split-method`'
+    Dataset\
+        .from_json(args.file[0])\
+        .subset(method=args.split_method.value, by_dir=not args.subset_by_total, count=args.subset_size)\
+        .to_json(args.output)
 
 
 def todo(_):
