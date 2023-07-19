@@ -114,6 +114,7 @@ def do_subset(args):
     Dataset\
         .from_json(args.file[0])\
         .subset(method=args.split_method.value, by_dir=not args.subset_by_total, count=args.subset_size)\
+        .copy_files(os.path.dirname(args.output))\
         .to_json(args.output)
 
 

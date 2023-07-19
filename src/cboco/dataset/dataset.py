@@ -3,6 +3,7 @@ import json
 from typing import List, Dict, Callable
 from dataclasses import dataclass
 from collections import defaultdict
+import shutil
 
 import numpy as np
 import cv2
@@ -32,16 +33,19 @@ class Dataset:
             images: List[Image],
             categories: List[Category],
             annotations: List[Annotation],
+            root='.',
             **extra):
         self.images = images
         self.categories = categories
         self.annotations = annotations
         self.extra = extra
+
+        self.root = root
     
     @classmethod
     def empty(cls, categories: List[Category], **extra) -> "Dataset":
         return cls([], categories, [], **extra)
-    
+
     def add_image(self, image: Image):
         image.set_id(len(self.images))
         self.images.append(image)
@@ -56,8 +60,9 @@ class Dataset:
         images_by_id = {image.id: image for image in images}
         categories = [Category(**cat) for cat in data['categories']]
         annotations = [Annotation(**ann, image=images_by_id[ann['image_id']]) for ann in data['annotations']]
-        
+
         return cls(
+            root=os.path.dirname(fn),
             images=images,
             categories=categories,
             annotations=annotations,
@@ -72,9 +77,10 @@ class Dataset:
             **self.extra
         )
     
-    def to_json(self, fn):
+    def to_json(self, fn) -> "Dataset":
         with open(fn, 'w') as f:
             json.dump(self.to_dict(), f, indent=2)
+        return self
     
     def collect_statistics(self) -> Statistics:
         num_images = len(self.images)
@@ -128,7 +134,7 @@ class Dataset:
             return self._subset_by_total(count, func)
     
     def _subset_by_dir(self, count: int, filter_func: FILTER_FUNC) -> "Dataset":
-        ds = Dataset.empty(self.categories, **self.extra)
+        ds = Dataset.empty(self.categories, root=self.root, **self.extra)
         images_by_dir = {}
         for im in self.images:
             im_dir = os.path.dirname(im.file_name)
@@ -146,13 +152,25 @@ class Dataset:
         return ds
 
     def _subset_by_total(self, count: int, filter_func: FILTER_FUNC) -> "Dataset":
-        ds = Dataset.empty(self.categories, **self.extra)
+        ds = Dataset.empty(self.categories, root=self.root, **self.extra)
         ds.images = filter_func(self.images, count)
         ds.annotations = []
         for i, im in enumerate(ds.images, start=1):
             im.set_id(i)
             ds.annotations.extend(im.annotations)
         return ds
+
+    def copy_files(self, dn: str) -> "Dataset":
+        if dn == self.root:
+            return
+        
+        for image in self.images:
+            src = os.path.join(self.root, image.file_name)
+            dest = os.path.join(dn, image.file_name)
+            dest_dir = os.path.dirname(dest)
+            os.makedirs(dest_dir, exist_ok=True)
+            shutil.copy(src, dest)
+        return self
     
     def union(self, *others: "Dataset", collision_strategy='error') -> "Dataset":
         def update_imset(im: Image, imset: dict) -> Image:
