@@ -4,6 +4,7 @@ from typing import List, Dict, Callable
 from dataclasses import dataclass
 from collections import defaultdict
 import shutil
+from copy import deepcopy
 
 from tqdm import tqdm
 import numpy as np
@@ -115,6 +116,14 @@ class Dataset:
             num_annotated_images_by_dir,
             num_annotations_by_class,
         )
+    
+    def filter_images(self, f: Callable[[Image], bool]) -> "Dataset":
+        images = [deepcopy(im) for im in self.images if f(im)]
+        annotations = []
+        for i, im in enumerate(images, start=1):
+            im.set_id(i)
+            annotations.extend(im.annotations)
+        return Dataset(images, self.categories, annotations, self.root, **self.extra)
     
     @staticmethod
     def random_filter(images: List[Image], count: int) -> List[Image]:
