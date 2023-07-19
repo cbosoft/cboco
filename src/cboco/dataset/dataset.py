@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from collections import defaultdict
 import shutil
 
+from tqdm import tqdm
 import numpy as np
 import cv2
 
@@ -164,7 +165,7 @@ class Dataset:
         if dn == self.root:
             return
         
-        for image in self.images:
+        for image in tqdm(self.images, unit='images'):
             src = os.path.join(self.root, image.file_name)
             dest = os.path.join(dn, image.file_name)
             dest_dir = os.path.dirname(dest)
