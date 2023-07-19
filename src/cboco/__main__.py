@@ -128,7 +128,7 @@ def do_union(args):
         .to_json(args.output)
 
 
-def todo(_):
+def todo(*_):
     raise NotImplementedError
 
 
