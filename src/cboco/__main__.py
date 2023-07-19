@@ -124,6 +124,7 @@ def do_union(args):
     datasets = [Dataset.from_json(fn) for fn in args.file]
     datasets[0]\
         .union(*datasets[1:], collision_strategy=args.union_collision_strategy.value)\
+        .copy_files(os.path.dirname(args.output))\
         .to_json(args.output)
 
 
