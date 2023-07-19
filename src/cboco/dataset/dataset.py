@@ -163,7 +163,7 @@ class Dataset:
 
     def copy_files(self, dn: str) -> "Dataset":
         if dn == self.root:
-            return
+            return self
         
         for image in tqdm(self.images, unit='images'):
             src = os.path.join(self.root, image.file_name)
