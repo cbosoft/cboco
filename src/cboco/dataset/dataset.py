@@ -195,7 +195,8 @@ class Dataset:
         for other in others:
             for image in other.images:
                 update_imset(image, image_set)
-            
+
+        self.images = list(image_set.values())
         self.annotations = []
         for i, im in enumerate(self.images, start=1):
             im.set_id(i)
