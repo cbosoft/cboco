@@ -119,7 +119,7 @@ def do_subset(args):
 
 
 def do_union(args):
-    assert len(args.file) > 1, 'unit requires at least 2 input datasets'
+    assert len(args.file) > 1, 'union requires at least 2 input datasets'
     assert args.output, 'union requires `--output`'
     datasets = [Dataset.from_json(fn) for fn in args.file]
     datasets[0]\
