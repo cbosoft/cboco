@@ -1,5 +1,6 @@
 import argparse
 import enum
+from typing import List, Optional
 import os
 from collections import defaultdict
 
@@ -36,16 +37,6 @@ class EnumAction(argparse.Action):
         setattr(namespace, self.dest, value)
 
 
-class Command(enum.Enum):
-    """Command to run. `stats` collects and displays statistics about the specified dataset. `intersect` takes two or more datasets, and outputs the common items between those datasets. `union` takes two or more datasets, and returns the combination of all of them. `subset` takes a dataset and returns a portion of the dataset, split by `split-method`. `unit` is the unit operation: reads a dataset and writes it out again - useful for catching or fixing bugs or formatting issues."""
-    stats = 'stats'
-    intersect = 'intersect'
-    union = 'union'
-    subset = 'subset'
-    unit = 'unit'
-    eval = 'eval'
-
-
 class SplitMethod(enum.Enum):
     """Dataset split method."""
     random = 'random'
@@ -59,39 +50,65 @@ class CollisionStrategy(enum.Enum):
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
-    parser.add_argument('command', type=Command, action=EnumAction, help=Command.__doc__)
-    parser.add_argument('file', type=str, nargs='+', help='Dataset json file paths')
-    parser.add_argument('--output', '-o', type=str, required=False, help='Output file name. Only required for commands that would write out.')
-    parser.add_argument('--split-method', type=SplitMethod, required=False, action=EnumAction, help=SplitMethod.__doc__)
-    parser.add_argument('--seed', type=int, default=0, help='Random seed.')
-    parser.add_argument('--subset-size', type=int, default=0)
-    parser.add_argument('--subset-by-total', action='store_true', default=False, help='Specify subset size by overall image, default is to striate subset by dir.')
-    parser.add_argument('--union-collision-strategy', type=CollisionStrategy, action=EnumAction, help=CollisionStrategy.__doc__, default=CollisionStrategy.error)
-    return parser.parse_args()
+    parser = argparse.ArgumentParser('python -m cboco')
+    subps = parser.add_subparsers(dest='command')
+    
+    stats_command = subps.add_parser('stats', help='Get stats about a dataset')
+    stats_command.add_argument('dataset', type=str, nargs='+', help='Dataset(s) to look at.')
+
+    subset_command = subps.add_parser('subset', help='Carve a portion off a dataset')
+    subset_command.add_argument('--method', type=SplitMethod, default=SplitMethod.random, action=EnumAction, help=SplitMethod.__doc__)
+    subset_command.add_argument('--size', type=int, default=100, help='Size of subset portion.')
+    subset_command.add_argument('--by-total', action='store_true', default=False, help='Specify subset size by overall image, default is to stratify subset by dir.')
+
+    union_command = subps.add_parser('union', help='Join two or more datasets together.')
+    union_command.add_argument('--collision-strategy', type=CollisionStrategy, action=EnumAction, help=CollisionStrategy.__doc__, default=CollisionStrategy.error)
+    union_command.add_argument('dataset1', type=str, nargs=1, help='First dataset to combine.')
+    union_command.add_argument('datasets', type=str, nargs='+', help='Rest of the datasets to combine.')
+    union_command.add_argument('--output', '-o', type=str, help='Name of resulting combined dataset.')
+
+    # TODO
+    # intersect_command = subps.add_parser('intersect', help='Get intersection of two or more datasets')
+
+    unit_command = subps.add_parser('unit', help='Open dataset and do nothing. Useful for catching errors. Optionally write formatted file out.')
+    unit_command.add_argument('dataset', type=str, nargs=1, help='Dataset to look at.')
+    unit_command.add_argument('--output', '-o', type=str, required=False, help='Name of resulting combined dataset.')
+
+    eval_command = subps.add_parser('eval', help='Evaluate one or more datasets with respect to a truth dataset.')
+    eval_command.add_argument('truth', type=str, help='Dataset with "ground truth" annotations.')
+    eval_command.add_argument('preds', type=str, nargs='+', help='Dataset(s) containing prediction object detections.')
+    eval_command.add_argument('--output', '-o', type=str, required=False, help='Filename to write evaluation report to for each of dataset $preds.')
+    eval_command.add_argument('--thresholds', '-t', type=str, default='coco', help='Comma-separated list of IoU thresholds (integers 0-100) to use to calculate metrics. Set to "coco" to use thresholds 50 to 95 in steps of 5.')
+    eval_command.add_argument('--values', '-v', type=str, nargs=1, default='AP_50,mAP,mF1', help='Comma-separated list of metrics to display. Set to "all" to display all. Default only valid for multiple IoU thresholds.')
+    eval_command.add_argument('--class-agnostic', action='store_true', help='Perform evaluation with no regard for particle class.')
+
+    args = parser.parse_args()
+    command = str(args.command)
+    del args.command
+    return command, args.__dict__
 
 
 def main():
-    args = parse_args()
+    command, kwargs = parse_args()
 
-    if args.command == Command.stats:
-        do_stats(args)
-    elif args.command == Command.intersect:
+    if command == 'stats':
+        do_stats(**kwargs)
+    elif command == 'intersect':
         todo()
-    elif args.command == Command.union:
-        do_union(args)
-    elif args.command == Command.subset:
-        do_subset(args)
-    elif args.command == Command.unit:
-        do_unit(args)
-    elif args.command == Command.eval:
-        do_eval(args)
+    elif command == 'union':
+        do_union(**kwargs)
+    elif command == 'subset':
+        do_subset(**kwargs)
+    elif command == 'unit':
+        do_unit(**kwargs)
+    elif command == 'eval':
+        do_eval(**kwargs)
     else:
-        raise ValueError(f'Unhandled command {args.command}!')
+        raise ValueError(f'Unhandled command {command}!')
 
 
-def do_stats(args):
-    for dsname in args.file:
+def do_stats(*, dataset: List[str]):
+    for dsname in dataset:
         stats = Dataset.from_json(dsname).collect_statistics()
         completion_pc = stats.num_annotated_images * 100. / stats.num_images
 
@@ -102,61 +119,75 @@ def do_stats(args):
             print(f' - {cls}: {n}')
 
 
-def do_unit(args):
-    assert len(args.file) == 1, 'unit accepts only 1 input dataset'
-    assert args.output, 'unit requires `--output`'
+def do_unit(*, dataset: str, output: Optional[str]):
+    ds = Dataset.from_json(dataset)
+    if output is not None:
+        ds.to_json(output)
+
+
+def do_subset(*, dataset: str, output: str, size: int, split_method: SplitMethod, by_total: bool):
     Dataset\
-        .from_json(args.file[0])\
-        .to_json(args.output)
+        .from_json(dataset)\
+        .subset(method=split_method.value, by_dir=not by_total, count=size)\
+        .copy_files(os.path.dirname(output))\
+        .to_json(output)
 
 
-def do_subset(args):
-    assert len(args.file) == 1, 'subset accepts only 1 input dataset'
-    assert args.output, 'subset requires `--output`'
-    assert args.subset_size, 'subset requires `--subset-size`'
-    assert args.split_method, 'subset requires `--split-method`'
-    Dataset\
-        .from_json(args.file[0])\
-        .subset(method=args.split_method.value, by_dir=not args.subset_by_total, count=args.subset_size)\
-        .copy_files(os.path.dirname(args.output))\
-        .to_json(args.output)
-
-
-def do_union(args):
-    assert len(args.file) > 1, 'union requires at least 2 input datasets'
-    assert args.output, 'union requires `--output`'
-    datasets = [Dataset.from_json(fn) for fn in args.file]
+def do_union(*, dataset1: str, dataset2: List[str], output: str, collision_strategy: CollisionStrategy):
+    datasets = [Dataset.from_json(fn) for fn in [dataset1, *dataset2]]
     datasets[0]\
-        .union(*datasets[1:], collision_strategy=args.union_collision_strategy.value)\
-        .copy_files(os.path.dirname(args.output))\
-        .to_json(args.output)
+        .union(*datasets[1:], collision_strategy=collision_strategy.value)\
+        .copy_files(os.path.dirname(output))\
+        .to_json(output)
 
 
-def do_eval(args):
-    assert len(args.file) == 2, 'eval requires 2 datasets: truth and preds.'
-    truth, preds = [Dataset.from_json(fn) for fn in args.file]
-    results = evaluate_dataset(
-        preds, truth,
-        iou_thresh=[0.5 + 0.05*i for i in range(10)],
-    )
-
-    print( 'Evalation results')
-    print( '-----------------')
-    print(f'TRUTH: {truth.root}')
-    print(f'PREDS: {preds.root}')
-    print(f'METRICS:')
-    for mname, mvalue in results.items():
-        print(f' - {mname}: {mvalue}')
+def do_eval(*, truth: str, preds: List[str], output: Optional[str], thresholds: str, values: str, class_agnostic: bool):
+    if thresholds == 'coco':
+        thresholds = [float(v)*0.01 for v in range(50, 100, 5)]
+    else:
+        thresholds = [float(v.strip())*0.01 for v in thresholds.split(',')]
     
-    if args.output is not None:
-        if not args.output.endswith('.txt'):
-            outname = args.output + '.txt'
+    ds_truth = Dataset.from_json(truth)
+    results_by_preds = {}
+    for pred in preds:
+        ds_preds = Dataset.from_json(pred)
+        results_by_preds[pred] = evaluate_dataset(
+            ds_preds, ds_truth,
+            iou_thresh=thresholds,
+            class_agnostic=class_agnostic,
+        )
+    
+    possible_keys = set(list(results_by_preds.values())[0].keys())
+    if values == 'all':
+        keys = list(possible_keys)
+    else:
+        keys = [v.strip() for v in values.split(',')]
+        assert possible_keys.issuperset(keys), \
+            f'invalid values specified: "{set(keys).difference(possible_keys.union(keys))}" out of "{possible_keys}"'
+    
+    results = {k: [] for k in keys}
+    for pred, pred_results in results_by_preds.items():
+        for k in keys:
+            results[k].append(pred_results[k])
+
+    print('Evalation results')
+    print(f'\nTruth: {truth}\n')
+    print(' {:20} | {}'.format('Metrics \\ Preds', ' | '.join([f'{p[-20:]:20}' for p in preds])))
+    for mname, mvalues in results.items():
+        print(' {:20} | {}'.format(mname, ' | '.join([f'{mvalue:.4f}'.ljust(20) for mvalue in mvalues])))
+    
+    if output is not None:
+        if not output.endswith('.txt'):
+            output = output + '.txt'
         else:
-            outname = args.output
-        print(f'Writing report to "{outname}"')
-        with open(outname, 'w') as f:
-            for mname, mvalue in results.items():
-                r.write(f'{mname} = {mvalue}\n')
+            output = output
+        print(f'Writing report to "{output}"')
+        with open(output, 'w') as f:
+            f.write(f'Truth: {truth}\n')
+            for predname, pred_results in results_by_preds.items():
+                f.write(f'vs preds: {predname}\n')
+                for mname, mvalue in pred_results.items():
+                    f.write(f'  * {mname} = {mvalue}\n')
 
 def todo(*_):
     raise NotImplementedError
