@@ -18,7 +18,9 @@ class Image:
         self.height = height
         self.extra = extra
         self.annotations = []
-        self.base_name = self.file_name.split('/')[-1]
+        fn_parts = self.file_name.split('/')
+        self.base_name = fn_parts[-1]
+        self.hashable_name = '/'.join(fn_parts[-3:])
     
     @classmethod
     def from_file(cls, file_name: str, **extra) -> "Image":
@@ -67,4 +69,4 @@ class Image:
         return same >= 1
     
     def __hash__(self) -> int:
-        return hash(self.base_name)
+        return hash(self.hashable_name)
