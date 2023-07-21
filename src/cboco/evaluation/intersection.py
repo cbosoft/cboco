@@ -10,7 +10,7 @@ def get_datasets_intersection(a: Dataset, b: Dataset) -> Tuple[Dataset, Dataset]
     b_images = set(b.images)
     # ensure no images lost due to hash collision
     assert len(a_images) == len(a.images), 'Hash collision in A!'
-    assert len(b_images) == len(b.images), 'Hash collision in A!'
+    assert len(b_images) == len(b.images), 'Hash collision in B!'
 
     common_images = set.intersection(a_images, b_images)
     
