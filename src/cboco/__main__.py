@@ -4,6 +4,7 @@ import os
 from collections import defaultdict
 
 from . import Dataset
+from . import evaluate_dataset
 
 
 class EnumAction(argparse.Action):
@@ -42,6 +43,7 @@ class Command(enum.Enum):
     union = 'union'
     subset = 'subset'
     unit = 'unit'
+    eval = 'eval'
 
 
 class SplitMethod(enum.Enum):
@@ -82,6 +84,8 @@ def main():
         do_subset(args)
     elif args.command == Command.unit:
         do_unit(args)
+    elif args.command == Command.eval:
+        do_eval(args)
     else:
         raise ValueError(f'Unhandled command {args.command}!')
 
@@ -127,6 +131,32 @@ def do_union(args):
         .copy_files(os.path.dirname(args.output))\
         .to_json(args.output)
 
+
+def do_eval(args):
+    assert len(args.file) == 2, 'eval requires 2 datasets: truth and preds.'
+    truth, preds = [Dataset.from_json(fn) for fn in args.file]
+    results = evaluate_dataset(
+        preds, truth,
+        iou_thresh=[0.5 + 0.05*i for i in range(10)],
+    )
+
+    print( 'Evalation results')
+    print( '-----------------')
+    print(f'TRUTH: {truth.root}')
+    print(f'PREDS: {preds.root}')
+    print(f'METRICS:')
+    for mname, mvalue in results.items():
+        print(f' - {mname}: {mvalue}')
+    
+    if args.output is not None:
+        if not args.output.endswith('.txt'):
+            outname = args.output + '.txt'
+        else:
+            outname = args.output
+        print(f'Writing report to "{outname}"')
+        with open(outname, 'w') as f:
+            for mname, mvalue in results.items():
+                r.write(f'{mname} = {mvalue}\n')
 
 def todo(*_):
     raise NotImplementedError
