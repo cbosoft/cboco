@@ -13,6 +13,7 @@ def get_datasets_intersection(a: Dataset, b: Dataset) -> Tuple[Dataset, Dataset]
     assert len(b_images) == len(b.images), 'Hash collision in B!'
 
     common_images = set.intersection(a_images, b_images)
+    assert common_images, 'No common images between datasets!'
     
     a_images = sorted([img for img in a_images if img in common_images], key=lambda i: i.base_name)
     b_images = sorted([img for img in b_images if img in common_images], key=lambda i: i.base_name)
