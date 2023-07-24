@@ -38,12 +38,23 @@ def evaluate_dataset(
     
     metrics = {}
     for thresh in iou_thresh:
-        tname = str(int(thresh*100))
-        tp = match_all_preds_to_truth(tann, pann, ious, thresh, class_agnostic)
+        # reset annotations
+        for _pann in pann:
+            _pann.is_tp = False
+            _pann.relevant_iou = 0.0
+        
+        matches = match_all_preds_to_truth(tann, pann, ious, thresh, class_agnostic)
+        for _tann, _pann in matches:
+            _pann.is_tp = True
+            _pann.relevant_iou = ious[_tann.id, _pann.id]
+        
+        tp = len(matches)
         fp = len(pann) - tp
         p = tp / (tp + fp)
         r = tp / gtp
         f1 = 2*p*r/(p + r) if tp else 0.0
+
+        tname = str(int(thresh*100))
         metrics[f'P_{tname}'] = p
         metrics[f'R_{tname}'] = r
         metrics[f'F1_{tname}'] = f1
