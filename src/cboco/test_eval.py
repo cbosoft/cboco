@@ -22,7 +22,7 @@ def test_intersection():
     true_images = set([i.base_name for i in true.images])
     preds = Dataset.from_json(os.path.join('test_data', 'B.json'))
     preds_images = set([i.base_name for i in preds.images])
-    image_lost = set([preds.images.pop()])
+    image_lost = set([preds.images.pop().base_name])
     i_preds, i_true = get_datasets_intersection(preds, true)
     i_true_images = set([i.base_name for i in i_true.images])
     i_preds_images = set([i.base_name for i in i_preds.images])
