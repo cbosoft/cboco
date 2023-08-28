@@ -1,10 +1,12 @@
 from enum import Enum
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import numpy as np
 import cv2
 
 from .image import Image
+from .contour_size import measure_size_of_contour
+
 
 class Annotation:
 
@@ -144,3 +146,8 @@ class Annotation:
             iscrowd=self.iscrowd,
             **self.extra
         )
+
+    def get_width_length(self, scale=1.0) -> Tuple[float, float]:
+        assert self.contour is not None
+        w, l = measure_size_of_contour(self.contour)
+        return w*scale, l*scale
