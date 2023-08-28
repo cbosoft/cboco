@@ -122,9 +122,9 @@ def do_stats(*, dataset: List[str], scale: List[str], unit: str):
 
         # only use unit if scale is valid
         unit = 'px' if not scale else unit
-        print(f'Mean length {stats.mean_length:.1f} {unit}')
-        print(f'Mean width {stats.mean_width:.1f} {unit}')
-        print(f'Mean aspect_ratio {stats.mean_aspect_ratio:.3f} {unit}')
+        print(f'Mean length {stats.mean_length:.1f} {unit} (σ={stats.stddev_length:.2f} {unit})')
+        print(f'Mean width {stats.mean_width:.1f} {unit} (σ={stats.stddev_width:.2f} {unit})')
+        print(f'Mean aspect_ratio {stats.mean_aspect_ratio:.3f} (σ={stats.stddev_aspect_ratio:.4f})')
 
 
 def do_unit(*, dataset: str, output: Optional[str]):

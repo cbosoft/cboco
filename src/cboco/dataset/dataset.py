@@ -30,8 +30,11 @@ class Dataset:
         num_annotated_images_by_dir: Dict[str, int]
         num_annotations_by_class: Dict[str, int]
         mean_length: float
+        stddev_length: float
         mean_width: float
+        stddev_width: float
         mean_aspect_ratio: float
+        stddev_aspect_ratio: float
         
 
     def __init__(
@@ -148,10 +151,6 @@ class Dataset:
 
         aspect_ratios = np.divide(widths, lengths)
 
-        mean_width = np.mean(widths)
-        mean_length = np.mean(lengths)
-        mean_aspect_ratio = np.mean(aspect_ratios)
-        
         return self.Statistics(
             num_images,
             num_annotations,
@@ -159,9 +158,12 @@ class Dataset:
             num_annotated_images,
             num_annotated_images_by_dir,
             num_annotations_by_class,
-            mean_length,
-            mean_width,
-            mean_aspect_ratio,
+            mean_length=np.mean(lengths),
+            stddev_length=np.std(lengths),
+            mean_width=np.mean(widths),
+            stddev_width=np.std(widths),
+            mean_aspect_ratio=np.mean(aspect_ratios),
+            stddev_aspect_ratio=np.std(aspect_ratios),
         )
     
     def filter_images(self, f: Callable[[Image], bool]) -> "Dataset":
