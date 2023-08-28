@@ -1,6 +1,7 @@
 import os
+import re
 import json
-from typing import List, Dict, Callable
+from typing import List, Dict, Callable, Tuple, Pattern
 from dataclasses import dataclass
 from collections import defaultdict
 import shutil
@@ -28,6 +29,9 @@ class Dataset:
         num_annotated_images: int
         num_annotated_images_by_dir: Dict[str, int]
         num_annotations_by_class: Dict[str, int]
+        mean_length: float
+        mean_width: float
+        mean_aspect_ratio: float
         
 
     def __init__(
@@ -83,8 +87,30 @@ class Dataset:
         with open(fn, 'w') as f:
             json.dump(self.to_dict(), f, indent=2)
         return self
-    
-    def collect_statistics(self) -> Statistics:
+
+    @staticmethod
+    def scales_from_strs(scales: List[str]) -> List[Tuple[Pattern, float]]:
+        rv = []
+        for src in scales:
+            if ':' not in src:
+                pattern_src = '.*'
+                scale_src = src
+            else:
+                pattern_src, scale_src = src.split(':')
+
+            pattern = re.compile('.*'+pattern_src+'.*')
+
+            if '/' in scale_src:
+                num, den = [float(v) for v in scale_src.split('/')]
+                scale = num/den
+            else:
+                scale = float(scale_src)
+
+            rv.append((pattern, scale))
+        return list(reversed(rv))
+
+    def collect_statistics(self, scales: List[str]) -> Statistics:
+        scales = self.scales_from_strs(scales)
         num_images = len(self.images)
         num_annotations = len(self.annotations)
         num_annotated_images = 0
@@ -95,6 +121,8 @@ class Dataset:
             cat.id: cat.name
             for cat in self.categories
         }
+        lengths = []
+        widths = []
         for image in self.images:
             d = os.path.dirname(image.file_name)
             n = len(image.annotations)
@@ -105,8 +133,24 @@ class Dataset:
                 num_annotated_images += 1
                 num_annotated_images_by_dir[d] += 1
             
+            scale = None if scales else 1.0
+            for p, s in scales:
+                if p.match(image.file_name):
+                    scale = s
+                    break
+            assert scale is not None, f'Length scale is set, but no pattern matched image file name "{image.file_name}"!'
+
             for ann in image.annotations:
                 num_annotations_by_class[categories[ann.category_id]] += 1
+                w, l = ann.get_width_length(scale)
+                widths.append(w)
+                lengths.append(l)
+
+        aspect_ratios = np.divide(widths, lengths)
+
+        mean_width = np.mean(widths)
+        mean_length = np.mean(lengths)
+        mean_aspect_ratio = np.mean(aspect_ratios)
         
         return self.Statistics(
             num_images,
@@ -115,6 +159,9 @@ class Dataset:
             num_annotated_images,
             num_annotated_images_by_dir,
             num_annotations_by_class,
+            mean_length,
+            mean_width,
+            mean_aspect_ratio,
         )
     
     def filter_images(self, f: Callable[[Image], bool]) -> "Dataset":

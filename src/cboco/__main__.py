@@ -55,6 +55,8 @@ def parse_args() -> argparse.Namespace:
     
     stats_command = subps.add_parser('stats', help='Get stats about a dataset')
     stats_command.add_argument('dataset', type=str, nargs='+', help='Dataset(s) to look at.')
+    stats_command.add_argument('--scale', '-s', type=str, action='append', help='string defining pixel size in format "<filename regex>:<pixel size or ratio>"')
+    stats_command.add_argument('--unit', type=str, default='μm', help='unit for scaled length. Default is micron.')
 
     subset_command = subps.add_parser('subset', help='Carve a portion off a dataset')
     subset_command.add_argument('--method', type=SplitMethod, default=SplitMethod.random, action=EnumAction, help=SplitMethod.__doc__)
@@ -107,9 +109,9 @@ def main():
         raise ValueError(f'Unhandled command {command}!')
 
 
-def do_stats(*, dataset: List[str]):
+def do_stats(*, dataset: List[str], scale: List[str], unit: str):
     for dsname in dataset:
-        stats = Dataset.from_json(dsname).collect_statistics()
+        stats = Dataset.from_json(dsname).collect_statistics(scale)
         completion_pc = stats.num_annotated_images * 100. / stats.num_images
 
         print(f'Dataset: {dsname}')
@@ -117,6 +119,12 @@ def do_stats(*, dataset: List[str]):
         print(f'Annotations by class:')
         for cls, n in stats.num_annotations_by_class.items():
             print(f' - {cls}: {n}')
+
+        # only use unit if scale is valid
+        unit = 'px' if not scale else unit
+        print(f'Mean length {stats.mean_length:.1f} {unit}')
+        print(f'Mean width {stats.mean_width:.1f} {unit}')
+        print(f'Mean aspect_ratio {stats.mean_aspect_ratio:.3f} {unit}')
 
 
 def do_unit(*, dataset: str, output: Optional[str]):
